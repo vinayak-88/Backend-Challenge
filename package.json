@@ -1,0 +1,16 @@
+{
+  "name": "slooze-food-ordering-assignment",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "dev:backend": "npm --workspace backend run start:dev",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "build": "npm run build --workspaces",
+    "seed": "npm --workspace backend run seed:direct"
+  }
+}
