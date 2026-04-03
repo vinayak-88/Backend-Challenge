@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  name           String
+  role           String
+  country        String?
+  paymentMethods PaymentMethod[]
+  orders         Order[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Restaurant {
+  id         String      @id @default(cuid())
+  name       String
+  country    String
+  menuItems  MenuItem[]
+  orders     Order[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model MenuItem {
+  id           String      @id @default(cuid())
+  name         String
+  description  String
+  price        Float
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId String
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model PaymentMethod {
+  id         String   @id @default(cuid())
+  type       String
+  last4      String
+  isDefault  Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  orders     Order[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Order {
+  id              String         @id @default(cuid())
+  status          String         @default("DRAFT")
+  total           Float          @default(0)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Restrict)
+  restaurantId    String
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  paymentMethodId String?
+  items           OrderItem[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  quantity   Int
+  unitPrice  Float
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  menuItemId String
+}
