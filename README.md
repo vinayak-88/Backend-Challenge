@@ -17,7 +17,6 @@ The following resources are included to help reviewers run and understand the sy
 - Dataset documentation: [docs/DATASETS.md](docs/DATASETS.md)
 - Architecture and design: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - API reference and access model: [docs/APIS.md](docs/APIS.md)
-- Full project handoff context: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)
 
 ## Tech Stack
 
