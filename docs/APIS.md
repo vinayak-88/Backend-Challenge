@@ -26,7 +26,6 @@ Base URL: http://localhost:4000/api
 - GET /cart
 - PUT /cart
 - GET /orders
-- POST /orders
 - POST /orders/:orderId/checkout
 - PATCH /orders/:orderId/payment-method
 - POST /orders/:orderId/cancel

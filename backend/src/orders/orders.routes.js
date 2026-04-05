@@ -8,14 +8,10 @@ function createOrdersRouter(ordersController, authenticate) {
 
   router.use(authenticate);
   router.get('/orders', asyncHandler(ordersController.listOrders.bind(ordersController)));
-  router.post(
-    '/orders',
-    requireRoles(Role.ADMIN, Role.MANAGER, Role.MEMBER),
-    asyncHandler(ordersController.createOrder.bind(ordersController)),
-  );
+  
   router.post(
     '/orders/:orderId/checkout',
-    requireRoles(Role.ADMIN, Role.MANAGER),
+    requireRoles(Role.ADMIN, Role.MANAGER, Role.MEMBER),
     asyncHandler(ordersController.checkoutOrder.bind(ordersController)),
   );
   router.patch(
@@ -25,7 +21,7 @@ function createOrdersRouter(ordersController, authenticate) {
   );
   router.post(
     '/orders/:orderId/cancel',
-    requireRoles(Role.ADMIN, Role.MANAGER),
+    requireRoles(Role.ADMIN, Role.MANAGER, Role.MEMBER),
     asyncHandler(ordersController.cancelOrder.bind(ordersController)),
   );
 
