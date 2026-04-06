@@ -52,7 +52,7 @@ Last updated: 2026-04-03
 - Country scoping in `backend/src/common/access.service.js`:
   - ADMIN bypasses country limits
   - MANAGER can act on same-country data/orders
-  - MEMBER is limited to own same-country orders
+  - MEMBER is limited to own same-country orders and cannot access GET /users — use GET /users/me instead.
 - JWT auth re-fetches the user from DB on every request in `backend/src/auth/auth.service.js`, so role changes apply immediately.
 
 ## Cart and Order Behavior
@@ -60,6 +60,8 @@ Last updated: 2026-04-03
 - `GET /api/cart` returns the user active DRAFT order.
 - `PUT /api/cart` stores the user active cart as draft order.
 - Draft cart persists across logout/login.
+- Draft orders cannot be cancelled via POST /orders/:orderId/cancel
+  Use PUT /cart with empty items to clear the cart instead.
 - Frontend cart sync is in `frontend/src/AppView.jsx`.
 - Orders are created as DRAFT in `backend/src/orders/orders.service.js`.
 - Checkout, payment update, and cancel enforce ownership/country checks.
@@ -105,11 +107,9 @@ Last updated: 2026-04-03
 - GET /api/users
 - GET /api/restaurants
 - GET /api/payments
-- POST /api/payments
 - GET /api/cart
 - PUT /api/cart
 - GET /api/orders
-- POST /api/orders
 - POST /api/orders/:orderId/checkout
 - PATCH /api/orders/:orderId/payment-method
 - POST /api/orders/:orderId/cancel
@@ -137,4 +137,3 @@ Last updated: 2026-04-03
 - No automated app test suite yet.
 - Request validation is basic (not schema-library-level).
 - Login rate limiting is noted but not implemented.
-- `backend/src/common/utils/sanitize-user.js` appears obsolete after select-based safe responses and may be unused.
