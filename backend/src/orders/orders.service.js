@@ -181,7 +181,7 @@ class OrdersService {
             create: orderItems,
           },
         },
-        include: cartSelect,
+        select: cartSelect,
       });
     }
 

@@ -26,7 +26,7 @@ Base URL: http://localhost:4000/api
 - GET /cart
 - PUT /cart
 - GET /orders
-- POST /orders/:orderId/checkout
+- POST /orders/:id/checkout
 - PATCH /orders/:orderId/payment-method
 - POST /orders/:orderId/cancel
 
@@ -62,21 +62,6 @@ Body:
     {
       "menuItemId": "<menuItemId>",
       "quantity": 2
-    }
-  ]
-}
-
-### POST /orders
-
-Body:
-
-{
-  "restaurantId": "<restaurantId>",
-  "paymentMethodId": "<paymentMethodId>",
-  "items": [
-    {
-      "menuItemId": "<menuItemId>",
-      "quantity": 1
     }
   ]
 }
