@@ -15,12 +15,33 @@ const orderUserInclude = {
 };
 
 const orderInclude = {
-  restaurant: true,
-  paymentMethod: true,
-  user: orderUserInclude,
+  restaurant: {
+    select: {
+      id: true,
+      name: true,
+      country: true,
+    },
+  },
+  paymentMethod: {
+    select: {
+      type: true,
+      last4: true,
+    },
+  },
+  user: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
   items: {
     include: {
-      menuItem: true,
+      menuItem: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   },
 };
@@ -329,6 +350,13 @@ class OrdersService {
       order.userId,
       order.restaurant.country,
     );
+
+    if (order.status === OrderStatus.DRAFT) {
+      throw createHttpError(
+        400,
+        "Draft orders cannot be cancelled. Clear the cart instead.",
+      );
+    }
 
     if (order.status === OrderStatus.CANCELLED) {
       throw createHttpError(400, "Order is already cancelled.");

@@ -14,6 +14,7 @@ This is a monorepo with two applications:
 - Backend services apply role and country access checks before data operations.
 - Prisma handles persistence to PostgreSQL.
 
+
 ## Backend Design
 
 Backend uses a layered structure:
@@ -59,7 +60,7 @@ Two layers are used intentionally:
 - Create order/cart: ADMIN, MANAGER, MEMBER
 - Checkout order: ADMIN, MANAGER
 - Cancel order: ADMIN, MANAGER
-- Update payment method: ADMIN
+- Update order payment method: ADMIN
 
 ### Country-Limited Model (Bonus)
 
@@ -116,4 +117,16 @@ API helper lives in frontend/src/lib/api.js and supports:
 
 - Database seed is deterministic for repeatable demos.
 - Backend has no compile step; JavaScript source runs directly.
-- Login rate limiting is noted for production hardening.
+
+## Production Hardening Notes
+
+The following items are intentionally out of scope for this 
+take-home assignment but would be addressed before production deployment:
+
+- Token revocation on re-login is not implemented. Old tokens remain 
+  valid until their 1-day expiry. In production this would be handled 
+  via token versioning or a Redis-based token blacklist.
+- Login endpoint has no rate limiting. express-rate-limit would be 
+  added before production deployment.
+- HTTPS is not enforced at the application layer — assumed to be 
+  handled by a reverse proxy in production.

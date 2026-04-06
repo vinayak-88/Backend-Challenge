@@ -22,10 +22,10 @@ Base URL: http://localhost:4000/api
 - GET /users (ADMIN, MANAGER only)
 - GET /restaurants
 - GET /payments
-- PUT /cart -> builds draft order, returns orderId
+- PUT /cart -> builds draft order, returns it
 - GET /cart -> view current cart (optional)
 - POST /orders/:orderId/checkout (ADMIN, MANAGER only)
-- PATCH /orders/:orderId/payment-method (ADMIN, MANAGER only)
+- PATCH /orders/:orderId/payment-method (ADMIN only)
 - POST /orders/:orderId/cancel (ADMIN, MANAGER only)
 - GET /orders -> view all orders
 
