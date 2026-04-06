@@ -8,11 +8,6 @@ function createPaymentsRouter(paymentsController, authenticate) {
 
   router.use(authenticate);
   router.get('/payments', asyncHandler(paymentsController.listPaymentMethods.bind(paymentsController)));
-  router.post(
-    '/payments',
-    requireRoles(Role.ADMIN),
-    asyncHandler(paymentsController.upsertPaymentMethod.bind(paymentsController)),
-  );
 
   return router;
 }

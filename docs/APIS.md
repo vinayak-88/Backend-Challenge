@@ -22,13 +22,12 @@ Base URL: http://localhost:4000/api
 - GET /users (ADMIN, MANAGER only)
 - GET /restaurants
 - GET /payments
-- POST /payments
 - PUT /cart -> builds draft order, returns orderId
 - GET /cart -> view current cart (optional)
-- GET /orders -> view all orders
 - POST /orders/:orderId/checkout (ADMIN, MANAGER only)
 - PATCH /orders/:orderId/payment-method (ADMIN, MANAGER only)
 - POST /orders/:orderId/cancel (ADMIN, MANAGER only)
+- GET /orders -> view all orders
 
 ## Request Shapes
 
@@ -39,16 +38,6 @@ Body:
 {
   "email": "nick@slooze.xyz",
   "password": "Password123!"
-}
-
-### POST /payments
-
-Body:
-
-{
-  "type": "VISA",
-  "last4": "9876",
-  "isDefault": true
 }
 
 ### PUT /cart
