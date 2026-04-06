@@ -19,16 +19,16 @@ Base URL: http://localhost:4000/api
 ### Protected
 
 - GET /users/me
-- GET /users
+- GET /users (ADMIN, MANAGER only)
 - GET /restaurants
 - GET /payments
 - POST /payments
-- GET /cart
-- PUT /cart
-- GET /orders
-- POST /orders/:id/checkout
-- PATCH /orders/:orderId/payment-method
-- POST /orders/:orderId/cancel
+- PUT /cart -> builds draft order, returns orderId
+- GET /cart -> view current cart (optional)
+- GET /orders -> view all orders
+- POST /orders/:orderId/checkout (ADMIN, MANAGER only)
+- PATCH /orders/:orderId/payment-method (ADMIN, MANAGER only)
+- POST /orders/:orderId/cancel (ADMIN, MANAGER only)
 
 ## Request Shapes
 
