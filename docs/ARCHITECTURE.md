@@ -49,8 +49,9 @@ Backend uses a layered structure:
 
 Two layers are used intentionally:
 
-- Route-level RBAC as the first gate.
-- Data-level country and ownership checks in access.service.js as the second gate.
+- Route-level RBAC as the first gate — require-roles middleware enforces which roles can access each endpoint.
+- Data-level country and ownership checks as the second gate — 
+  access.service.js enforces ensureCountryScope and canManageOrder for country and ownership scoping.
 
 ### RBAC Matrix
 
@@ -64,7 +65,7 @@ Two layers are used intentionally:
 
 - ADMIN: global access.
 - MANAGER: limited to same-country data and actions.
-- MEMBER: limited to own and same-country data/actions.
+- MEMBER: limited to own orders and data only. Cannot access GET /users — use GET /users/me instead.
 
 ## Data Model (Prisma)
 
