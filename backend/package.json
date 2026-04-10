@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "node -e \"console.log('Backend uses JavaScript source files; no build step is required.')\"",
+    "build": "prisma generate",
     "start": "node src/main.js",
     "start:dev": "node --watch src/main.js",
     "db:up": "docker compose up -d postgres",
