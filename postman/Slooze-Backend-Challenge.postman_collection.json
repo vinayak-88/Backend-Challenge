@@ -174,35 +174,6 @@
               ]
             }
           }
-        },
-        {
-          "name": "Add Payment Method (Admin)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"VISA\",\n  \"last4\": \"9876\",\n  \"isDefault\": true\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/payments",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "payments"
-              ]
-            }
-          }
         }
       ]
     },
@@ -286,36 +257,7 @@
           }
         },
         {
-          "name": "Create Order",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"restaurantId\": \"{{restaurantId}}\",\n  \"paymentMethodId\": \"{{paymentMethodId}}\",\n  \"items\": [\n    {\n      \"menuItemId\": \"{{menuItemId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/orders",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "orders"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Checkout Order",
+          "name": "Checkout Order(Admin, Manager)",
           "request": {
             "method": "POST",
             "header": [
@@ -377,7 +319,7 @@
           }
         },
         {
-          "name": "Cancel Order",
+          "name": "Cancel Order(Admin, Manager)",
           "request": {
             "method": "POST",
             "header": [
@@ -405,7 +347,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:4000/api"
+      "value": "https://backend-production-2da9.up.railway.app/api"
     },
     {
       "key": "token",
