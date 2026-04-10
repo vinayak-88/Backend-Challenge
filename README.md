@@ -106,8 +106,8 @@ npm run dev:frontend
 
 URLs:
 
-- Backend API: http://localhost:4000/api
-- Frontend UI: http://localhost:5173
+- Backend API: https://backend-production-2da9.up.railway.app/api
+- Frontend UI: https://frontend-production-925d3.up.railway.app
 
 ## Demo Accounts
 
