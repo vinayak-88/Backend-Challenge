@@ -2,7 +2,7 @@
 
 This repository contains a full-stack food ordering application that implements:
 
-- Express REST backend with Prisma
+- Express GraphQL backend with Prisma
 - PostgreSQL persistence (Neon-ready)
 - React + Vite frontend
 - JWT authentication
@@ -12,15 +12,15 @@ This repository contains a full-stack food ordering application that implements:
 
 The following resources are included to help reviewers run and understand the system:
 
-- API collection: [postman/Slooze-Backend-Challenge.postman_collection.json](postman/Slooze-Backend-Challenge.postman_collection.json)
-- Postman environment: [postman/Slooze-Backend-Challenge.postman_environment.json](postman/Slooze-Backend-Challenge.postman_environment.json)
+- Legacy Postman artifacts: [postman/Slooze-Backend-Challenge.postman_collection.json](postman/Slooze-Backend-Challenge.postman_collection.json)
+- Legacy Postman environment: [postman/Slooze-Backend-Challenge.postman_environment.json](postman/Slooze-Backend-Challenge.postman_environment.json)
 - Dataset documentation: [docs/DATASETS.md](docs/DATASETS.md)
 - Architecture and design: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - API reference and access model: [docs/APIS.md](docs/APIS.md)
 
 ## Tech Stack
 
-- Backend: Express, Prisma Client, PostgreSQL
+- Backend: Express, GraphQL, Prisma Client, PostgreSQL
 - Frontend: React, Vite
 - Auth: JWT
 - Access Control: Role-based route guards + country-scoped data checks
@@ -79,7 +79,7 @@ Copy [frontend/.env.example](frontend/.env.example) to frontend/.env.
 Default value:
 
 ```text
-VITE_API_URL=http://localhost:4000/api
+VITE_API_URL=http://localhost:4000/graphql
 ```
 
 ### 5. Prepare database
@@ -106,7 +106,7 @@ npm run dev:frontend
 
 URLs:
 
-- Backend API: https://backend-production-2da9.up.railway.app/api
+- Backend API: https://backend-production-2da9.up.railway.app/graphql
 - Frontend UI: https://frontend-production-925d3.up.railway.app
 
 ## Demo Accounts
@@ -161,15 +161,18 @@ Frontend scripts:
 - npm --workspace frontend run build
 - npm --workspace frontend run preview
 
-## Reviewer Quick Test (Postman)
+## Reviewer Quick Test
 
-1. Import [postman/Slooze-Backend-Challenge.postman_collection.json](postman/Slooze-Backend-Challenge.postman_collection.json).
-2. Import [postman/Slooze-Backend-Challenge.postman_environment.json](postman/Slooze-Backend-Challenge.postman_environment.json).
-3. Run Login request first to populate token.
-4. Run restaurants/cart/orders/payment requests in order.
+Send GraphQL operations to `POST /graphql`.
+
+1. Run the `login` mutation and capture `accessToken`.
+2. Send `Authorization: Bearer <accessToken>` on protected operations.
+3. Query `me`, `restaurants`, `payments`, `cart`, and `orders`.
+4. Exercise `saveCart`, `checkoutOrder`, `updateOrderPaymentMethod`, and `cancelOrder`.
 
 ## Notes
 
-- Login route currently has a TODO note for production rate limiting.
+- The checked-in Postman files still reflect the previous REST transport; `docs/APIS.md` is the current GraphQL reference.
+- Login flow currently has a TODO note for production rate limiting.
 - Request validation is intentionally minimal for this take-home implementation.
 - Automated end-to-end test suite is not included yet.

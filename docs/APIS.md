@@ -1,96 +1,147 @@
 # API Reference
 
-Base URL: http://localhost:4000/api
+GraphQL endpoint: `http://localhost:4000/graphql`
 
 ## Authentication
 
 - Auth mechanism: Bearer token (JWT)
-- Login endpoint returns accessToken
-- Pass Authorization header for protected endpoints:
-  - Authorization: Bearer <accessToken>
+- `login` returns `accessToken`
+- Pass the token on protected operations as `Authorization: Bearer <accessToken>`
 
-## Endpoint List
+## Operations
 
 ### Public
 
-- GET /health
-- POST /auth/login
+- `query health`
+- `mutation login(email, password)`
 
-### Protected
+### Protected queries
 
-- GET /users/me
-- GET /users (ADMIN, MANAGER only)
-- GET /restaurants
-- GET /payments
-- PUT /cart -> builds draft order, returns it
-- GET /cart -> view current cart (optional)
-- POST /orders/:orderId/checkout (ADMIN, MANAGER only)
-- PATCH /orders/:orderId/payment-method (ADMIN only)
-- POST /orders/:orderId/cancel (ADMIN, MANAGER only)
-- GET /orders -> view all orders
+- `query me`
+- `query users` (`ADMIN`, `MANAGER`)
+- `query restaurants`
+- `query payments`
+- `query cart`
+- `query orders`
 
-## Request Shapes
+### Protected mutations
 
-### POST /auth/login
+- `mutation saveCart(input)` (`ADMIN`, `MANAGER`, `MEMBER`)
+- `mutation checkoutOrder(orderId, paymentMethodId)` (`ADMIN`, `MANAGER`)
+- `mutation updateOrderPaymentMethod(orderId, paymentMethodId)` (`ADMIN`)
+- `mutation cancelOrder(orderId)` (`ADMIN`, `MANAGER`)
 
-Body:
+## Example Operations
 
+### Login
+
+```graphql
+mutation Login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    accessToken
+    user {
+      id
+      email
+      name
+      role
+      country
+    }
+  }
+}
+```
+
+Variables:
+
+```json
 {
   "email": "nick@slooze.xyz",
   "password": "Password123!"
 }
+```
 
-### PUT /cart
+### Save cart
 
-Body:
-
-{
-  "restaurantId": "<restaurantId>",
-  "paymentMethodId": "<paymentMethodId>",
-  "items": [
-    {
-      "menuItemId": "<menuItemId>",
-      "quantity": 2
+```graphql
+mutation SaveCart($input: SaveCartInput!) {
+  saveCart(input: $input) {
+    id
+    status
+    total
+    restaurantId
+    paymentMethodId
+    items {
+      menuItemId
+      quantity
+      unitPrice
+      menuItem {
+        name
+      }
     }
-  ]
+  }
 }
+```
 
-### POST /orders/:orderId/checkout
+Variables:
 
-Body:
-
+```json
 {
-  "paymentMethodId": "<paymentMethodId>"
+  "input": {
+    "restaurantId": "<restaurantId>",
+    "paymentMethodId": "<paymentMethodId>",
+    "items": [
+      {
+        "menuItemId": "<menuItemId>",
+        "quantity": 2
+      }
+    ]
+  }
 }
+```
 
-### PATCH /orders/:orderId/payment-method
+### Checkout order
 
-Body:
-
-{
-  "paymentMethodId": "<paymentMethodId>"
+```graphql
+mutation CheckoutOrder($orderId: ID!, $paymentMethodId: ID!) {
+  checkoutOrder(orderId: $orderId, paymentMethodId: $paymentMethodId) {
+    id
+    status
+    paymentMethodId
+  }
 }
+```
+
+### Update payment method
+
+```graphql
+mutation UpdateOrderPaymentMethod($orderId: ID!, $paymentMethodId: ID!) {
+  updateOrderPaymentMethod(orderId: $orderId, paymentMethodId: $paymentMethodId) {
+    id
+    status
+    paymentMethodId
+  }
+}
+```
 
 ## RBAC Matrix
 
-- View restaurants/menu: ADMIN, MANAGER, MEMBER
-- Create order/cart: ADMIN, MANAGER, MEMBER
-- Checkout order: ADMIN, MANAGER
-- Cancel order: ADMIN, MANAGER
-- Update payment method: ADMIN
+- View restaurants/menu: `ADMIN`, `MANAGER`, `MEMBER`
+- Create order/cart: `ADMIN`, `MANAGER`, `MEMBER`
+- Checkout order: `ADMIN`, `MANAGER`
+- Cancel order: `ADMIN`, `MANAGER`
+- Update payment method: `ADMIN`
 
 ## Country-Scoped Access
 
-- ADMIN can access all countries.
-- MANAGER is scoped to same-country data/actions.
-- MEMBER is scoped to own and same-country data/actions.
+- `ADMIN` can access all countries.
+- `MANAGER` is scoped to same-country data and actions.
+- `MEMBER` is scoped to own and same-country data and actions.
 
 ## Typical Call Sequence
 
-1. POST /auth/login
-2. GET /users/me
-3. GET /restaurants
-4. GET /payments
-5. PUT /cart
-6. GET /orders
-7. POST /orders/:orderId/checkout (role permitting)
+1. Run `login`.
+2. Run `me`.
+3. Run `restaurants`.
+4. Run `payments`.
+5. Run `saveCart`.
+6. Run `orders`.
+7. Run `checkoutOrder` when role permits.

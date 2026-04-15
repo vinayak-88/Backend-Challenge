@@ -3,6 +3,9 @@ const paymentMethodSummarySelect = {
   type: true,
   last4: true,
   isDefault: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
 };
 
 const paymentMethodsRelationSelect = {

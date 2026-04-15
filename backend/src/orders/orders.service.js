@@ -51,6 +51,7 @@ const cartSelect = {
   status: true,
   total: true,
   restaurantId: true,
+  paymentMethodId: true,
   items: {
     select: {
       menuItemId: true,

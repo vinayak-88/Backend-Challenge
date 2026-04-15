@@ -1,5 +1,3 @@
-const VALID_PAYMENT_TYPES = ['VISA', 'MASTERCARD'];
-
 class PaymentsService {
   constructor(prisma) {
     this.prisma = prisma;

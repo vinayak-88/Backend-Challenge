@@ -1,4 +1,268 @@
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/graphql';
+
+const OPERATIONS = {
+  me: `
+    query Me {
+      me {
+        id
+        email
+        name
+        role
+        country
+        paymentMethods {
+          id
+          type
+          last4
+          isDefault
+        }
+      }
+    }
+  `,
+  users: `
+    query Users {
+      users {
+        id
+        email
+        name
+        role
+        country
+        paymentMethods {
+          id
+          type
+          last4
+          isDefault
+        }
+      }
+    }
+  `,
+  login: `
+    mutation Login($email: String!, $password: String!) {
+      login(email: $email, password: $password) {
+        accessToken
+        user {
+          id
+          email
+          name
+          role
+          country
+          paymentMethods {
+            id
+            type
+            last4
+            isDefault
+          }
+        }
+      }
+    }
+  `,
+  restaurants: `
+    query Restaurants {
+      restaurants {
+        id
+        name
+        country
+        menuItems {
+          id
+          name
+          description
+          price
+        }
+      }
+    }
+  `,
+  payments: `
+    query Payments {
+      payments {
+        id
+        type
+        last4
+        isDefault
+      }
+    }
+  `,
+  cart: `
+    query Cart {
+      cart {
+        id
+        status
+        total
+        restaurantId
+        paymentMethodId
+        items {
+          menuItemId
+          quantity
+          unitPrice
+          menuItem {
+            name
+          }
+        }
+      }
+    }
+  `,
+  saveCart: `
+    mutation SaveCart($input: SaveCartInput!) {
+      saveCart(input: $input) {
+        id
+        status
+        total
+        restaurantId
+        paymentMethodId
+        items {
+          menuItemId
+          quantity
+          unitPrice
+          menuItem {
+            name
+          }
+        }
+      }
+    }
+  `,
+  orders: `
+    query Orders {
+      orders {
+        id
+        status
+        total
+        userId
+        restaurantId
+        paymentMethodId
+        restaurant {
+          id
+          name
+          country
+        }
+        paymentMethod {
+          type
+          last4
+        }
+        user {
+          id
+          name
+        }
+        items {
+          id
+          orderId
+          menuItemId
+          quantity
+          unitPrice
+          menuItem {
+            id
+            name
+          }
+        }
+      }
+    }
+  `,
+  checkoutOrder: `
+    mutation CheckoutOrder($orderId: ID!, $paymentMethodId: ID!) {
+      checkoutOrder(orderId: $orderId, paymentMethodId: $paymentMethodId) {
+        id
+        status
+        total
+        userId
+        restaurantId
+        paymentMethodId
+        restaurant {
+          id
+          name
+          country
+        }
+        paymentMethod {
+          type
+          last4
+        }
+        user {
+          id
+          name
+        }
+        items {
+          id
+          orderId
+          menuItemId
+          quantity
+          unitPrice
+          menuItem {
+            id
+            name
+          }
+        }
+      }
+    }
+  `,
+  updateOrderPaymentMethod: `
+    mutation UpdateOrderPaymentMethod($orderId: ID!, $paymentMethodId: ID!) {
+      updateOrderPaymentMethod(orderId: $orderId, paymentMethodId: $paymentMethodId) {
+        id
+        status
+        total
+        userId
+        restaurantId
+        paymentMethodId
+        restaurant {
+          id
+          name
+          country
+        }
+        paymentMethod {
+          type
+          last4
+        }
+        user {
+          id
+          name
+        }
+        items {
+          id
+          orderId
+          menuItemId
+          quantity
+          unitPrice
+          menuItem {
+            id
+            name
+          }
+        }
+      }
+    }
+  `,
+  cancelOrder: `
+    mutation CancelOrder($orderId: ID!) {
+      cancelOrder(orderId: $orderId) {
+        id
+        status
+        total
+        userId
+        restaurantId
+        paymentMethodId
+        restaurant {
+          id
+          name
+          country
+        }
+        paymentMethod {
+          type
+          last4
+        }
+        user {
+          id
+          name
+        }
+        items {
+          id
+          orderId
+          menuItemId
+          quantity
+          unitPrice
+          menuItem {
+            id
+            name
+          }
+        }
+      }
+    }
+  `,
+};
 
 class ApiClient {
   constructor() {
@@ -18,35 +282,34 @@ class ApiClient {
   }
 
   async getMe() {
-    return this.request('/users/me');
+    const data = await this.request(OPERATIONS.me);
+    return data.me;
   }
 
   async listUsers() {
-    return this.request('/users');
+    const data = await this.request(OPERATIONS.users);
+    return data.users;
   }
 
-  async request(path, options = {}) {
+  async request(query, { variables, withAuth = true, operationName } = {}) {
     const headers = {
       'Content-Type': 'application/json',
-      ...options.headers,
     };
 
     const token = this.getToken();
-    if (token) {
+    if (withAuth && token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${this.baseURL}${path}`, {
-      ...options,
+    const response = await fetch(this.baseURL, {
+      method: 'POST',
       headers,
+      body: JSON.stringify({
+        query,
+        variables,
+        operationName,
+      }),
     });
-
-    if (response.status === 401) {
-      this.clearToken();
-      const error = new Error('Unauthorized');
-      error.unauthorized = true;
-      throw error;
-    }
 
     let data;
     try {
@@ -55,72 +318,92 @@ class ApiClient {
       throw new Error('Failed to parse response');
     }
 
-    if (!response.ok) {
-      const errorMessage = data?.message || data?.error || `Request failed: ${response.status}`;
+    const firstError = data?.errors?.[0];
+    const firstStatus = firstError?.extensions?.http?.status || response.status;
+    const firstCode = firstError?.extensions?.code;
+
+    if (firstStatus === 401 || firstCode === 'UNAUTHENTICATED') {
+      this.clearToken();
+      const error = new Error(firstError?.message || 'Unauthorized');
+      error.unauthorized = true;
+      error.response = response;
+      error.data = data;
+      throw error;
+    }
+
+    if (!response.ok || firstError) {
+      const errorMessage = firstError?.message || `Request failed: ${response.status}`;
       const error = new Error(errorMessage);
       error.response = response;
       error.data = data;
       throw error;
     }
 
-    return data;
+    return data.data;
   }
 
   // Auth
   async login(email, password) {
-    const data = await this.request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
+    const data = await this.request(OPERATIONS.login, {
+      variables: { email, password },
+      withAuth: false,
     });
-    this.setToken(data.accessToken);
-    return data;
+    this.setToken(data.login.accessToken);
+    return data.login;
   }
 
   // Restaurants
   async getRestaurants() {
-    return this.request('/restaurants');
+    const data = await this.request(OPERATIONS.restaurants);
+    return data.restaurants;
   }
 
   // Payments
   async getPayments() {
-    return this.request('/payments');
+    const data = await this.request(OPERATIONS.payments);
+    return data.payments;
   }
 
   // Cart
   async getCart() {
-    return this.request('/cart');
+    const data = await this.request(OPERATIONS.cart);
+    return data.cart;
   }
 
   async saveCart(cartData) {
-    return this.request('/cart', {
-      method: 'PUT',
-      body: JSON.stringify(cartData),
+    const data = await this.request(OPERATIONS.saveCart, {
+      variables: {
+        input: cartData,
+      },
     });
+    return data.saveCart;
   }
 
   // Orders
   async getOrders() {
-    return this.request('/orders');
+    const data = await this.request(OPERATIONS.orders);
+    return data.orders;
   }
 
   async checkoutOrder(orderId, paymentMethodId) {
-    return this.request(`/orders/${orderId}/checkout`, {
-      method: 'POST',
-      body: JSON.stringify({ paymentMethodId }),
+    const data = await this.request(OPERATIONS.checkoutOrder, {
+      variables: { orderId, paymentMethodId },
     });
+    return data.checkoutOrder;
   }
 
   async updateOrderPaymentMethod(orderId, paymentMethodId) {
-    return this.request(`/orders/${orderId}/payment-method`, {
-      method: 'PATCH',
-      body: JSON.stringify({ paymentMethodId }),
+    const data = await this.request(OPERATIONS.updateOrderPaymentMethod, {
+      variables: { orderId, paymentMethodId },
     });
+    return data.updateOrderPaymentMethod;
   }
 
   async cancelOrder(orderId) {
-    return this.request(`/orders/${orderId}/cancel`, {
-      method: 'POST',
+    const data = await this.request(OPERATIONS.cancelOrder, {
+      variables: { orderId },
     });
+    return data.cancelOrder;
   }
 }
 

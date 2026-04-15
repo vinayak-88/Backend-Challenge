@@ -16,7 +16,7 @@ const app = createApp(container);
 async function bootstrap() {
   await container.prisma.$connect();
   app.listen(PORT, () => {
-    console.log(`REST API listening on http://localhost:${PORT}`);
+    console.log(`GraphQL API listening on http://localhost:${PORT}/graphql`);
   });
 }
 

@@ -47,6 +47,9 @@ class AuthService {
           type: paymentMethod.type,
           last4: paymentMethod.last4,
           isDefault: paymentMethod.isDefault,
+          userId: paymentMethod.userId,
+          createdAt: paymentMethod.createdAt,
+          updatedAt: paymentMethod.updatedAt,
         })),
       },
     };

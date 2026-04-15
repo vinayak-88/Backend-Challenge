@@ -5,7 +5,7 @@ Last updated: 2026-04-03
 ## Project Goal
 - Full-stack food ordering app for the Slooze take-home.
 - Final stack:
-  - Backend: Express + REST + Prisma
+  - Backend: Express + GraphQL + Prisma
   - Database: PostgreSQL on Neon
   - Frontend: React + Vite
 - Assignment requirements covered:
@@ -23,46 +23,43 @@ Last updated: 2026-04-03
   - Bootstrap: `backend/src/main.js`
   - App wiring: `backend/src/app.js`
   - DI container: `backend/src/container.js`
-  - Feature modules:
+  - GraphQL transport:
+    - `backend/src/graphql/router.js`
+    - `backend/src/graphql/schema.js`
+  - Service modules:
     - `backend/src/auth`
     - `backend/src/users`
     - `backend/src/restaurants`
     - `backend/src/payments`
-    - `backend/src/cart`
     - `backend/src/orders`
-    - `backend/src/health`
   - Shared components:
     - `backend/src/common/access.service.js`
-    - `backend/src/common/middleware/require-roles.js`
-    - `backend/src/common/middleware/authenticate.js`
     - `backend/src/common/middleware/error-handler.js`
     - `backend/src/common/http-error.js`
 
 ## Authorization Model
-- Authoritative enforcement is route-level RBAC.
+- Authoritative enforcement is resolver-level RBAC.
 - Role permissions:
   - View restaurants/menu items: ADMIN, MANAGER, MEMBER
   - Create order/cart: ADMIN, MANAGER, MEMBER
   - Checkout: ADMIN, MANAGER
   - Cancel order: ADMIN, MANAGER
   - Update payment method: ADMIN
-- Route policy is visible in route files such as:
-  - `backend/src/orders/orders.routes.js`
-  - `backend/src/payments/payments.routes.js`
+- GraphQL policy is enforced in `backend/src/graphql/schema.js`.
 - Country scoping in `backend/src/common/access.service.js`:
   - ADMIN bypasses country limits
   - MANAGER can act on same-country data/orders
-  - MEMBER is limited to own same-country orders and cannot access GET /users — use GET /users/me instead.
+  - MEMBER is limited to own same-country orders and cannot access `users`; use `me` instead.
 - JWT auth re-fetches the user from DB on every request in `backend/src/auth/auth.service.js`, so role changes apply immediately.
 
 ## Cart and Order Behavior
 - Cart is backend-persisted (no longer frontend-only).
-- `GET /api/cart` returns the user active DRAFT order.
-- `PUT /api/cart` stores the user active cart as draft order.
+- `cart` returns the user active `DRAFT` order.
+- `saveCart` stores the user active cart as a draft order.
 - Draft cart persists across logout/login.
-- Draft orders cannot be cancelled via POST /orders/:orderId/cancel
-  Use PUT /cart with empty items to clear the cart instead.
-- Frontend cart sync is in `frontend/src/AppView.jsx`.
+- Draft orders cannot be cancelled via `cancelOrder`.
+  Use `saveCart` with empty `items` to clear the cart instead.
+- Frontend cart sync is in `frontend/src/App.jsx`.
 - Orders are created as DRAFT in `backend/src/orders/orders.service.js`.
 - Checkout, payment update, and cancel enforce ownership/country checks.
 
@@ -82,7 +79,7 @@ Last updated: 2026-04-03
 - Shared seeded password: `Password123!`
 
 ## Frontend
-- Main screen: `frontend/src/AppView.jsx`
+- Main screen: `frontend/src/App.jsx`
 - API helper: `frontend/src/lib/api.js`
 - UI currently supports:
   - login/logout
@@ -95,24 +92,23 @@ Last updated: 2026-04-03
 ## Safety and Validation
 - `JWT_SECRET` is required on startup in `backend/src/main.js`.
 - Known HTTP errors are forwarded safely; unknown errors return generic `Internal server error.` in `backend/src/common/middleware/error-handler.js`.
-- Required field validation helper: `backend/src/common/utils/require-body-fields.js`.
 - Payment-method ownership is validated on cart save and order creation in `backend/src/orders/orders.service.js`.
 - Safe user responses are controlled by Prisma select allowlists in `backend/src/users/user.selects.js`.
-- Login route includes note about missing production rate limiting in `backend/src/auth/auth.routes.js`.
+- Login flow includes note about missing production rate limiting.
 
-## API Endpoints
-- POST /api/auth/login
-- GET /api/health
-- GET /api/users/me
-- GET /api/users
-- GET /api/restaurants
-- GET /api/payments
-- GET /api/cart
-- PUT /api/cart
-- GET /api/orders
-- POST /api/orders/:orderId/checkout
-- PATCH /api/orders/:orderId/payment-method
-- POST /api/orders/:orderId/cancel
+## GraphQL Operations
+- `query health`
+- `query me`
+- `query users`
+- `query restaurants`
+- `query payments`
+- `query cart`
+- `query orders`
+- `mutation login`
+- `mutation saveCart`
+- `mutation checkoutOrder`
+- `mutation updateOrderPaymentMethod`
+- `mutation cancelOrder`
 
 ## Verification Completed
 - Backend syntax checks passed repeatedly.
