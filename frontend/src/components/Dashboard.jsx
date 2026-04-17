@@ -90,32 +90,6 @@ export default function Dashboard({
     return selectedPayment[order.id] || order.paymentMethodId || fallbackPayment?.id || ''
   }
 
-  const getUserCarts = (managedUser) => {
-    const possibleCarts = managedUser.carts || managedUser.cart || managedUser.activeCart || managedUser.orders || []
-    const carts = Array.isArray(possibleCarts) ? possibleCarts : [possibleCarts]
-    const visibleDraftOrders = orders.filter(
-      (order) => order.userId === managedUser.id && order.status === 'DRAFT',
-    )
-    const ownCart = managedUser.id === user.id && cart ? [cart] : []
-    const mergedCarts = [...carts, ...visibleDraftOrders, ...ownCart]
-    const uniqueCarts = new Map()
-
-    mergedCarts
-      .filter(Boolean)
-      .filter((userCart) => !userCart.status || userCart.status === 'DRAFT')
-      .forEach((userCart) => {
-        uniqueCarts.set(userCart.id || userCart.restaurantId, userCart)
-      })
-
-    return Array.from(uniqueCarts.values())
-  }
-
-  const getUserCartRestaurantName = (userCart) =>
-    userCart.restaurant?.name ||
-    restaurants.find((restaurant) => restaurant.id === userCart.restaurantId)?.name ||
-    userCart.restaurantId ||
-    'Unknown restaurant'
-
   const handlePaymentSelection = (orderId, paymentMethodId) => {
     setSelectedPayment((prev) => ({
       ...prev,
@@ -520,8 +494,6 @@ export default function Dashboard({
             ) : (
               <div className="users-grid">
                 {users.map((managedUser) => {
-                  const userCarts = getUserCarts(managedUser)
-
                   return (
                     <article key={managedUser.id} className="user-card">
                       <div className="user-card-header">
@@ -540,10 +512,6 @@ export default function Dashboard({
                           <label>Payment Methods</label>
                           <span>{managedUser.paymentMethods?.length || 0}</span>
                         </div>
-                        <div className="order-detail-item">
-                          <label>Active Carts</label>
-                          <span>{userCarts.length}</span>
-                        </div>
                       </div>
 
                       {managedUser.paymentMethods?.length > 0 && (
@@ -559,32 +527,6 @@ export default function Dashboard({
                           </div>
                         </div>
                       )}
-
-                      <div className="user-section">
-                        <h4>Carts</h4>
-                        {userCarts.length === 0 ? (
-                          <p className="muted-text">No active cart data returned for this user.</p>
-                        ) : (
-                          userCarts.map((userCart) => (
-                            <div key={userCart.id || userCart.restaurantId} className="user-cart">
-                              <div className="cart-item">
-                                <span>{getUserCartRestaurantName(userCart)}</span>
-                                <strong>{formatCurrency(userCart.total)}</strong>
-                              </div>
-                              {userCart.items?.length > 0 && (
-                                <div className="cart-items-list compact-list">
-                                  {userCart.items.map((item) => (
-                                    <div key={item.id || item.menuItemId} className="cart-item">
-                                      <span>{item.menuItem?.name || item.name || item.menuItemId} x {item.quantity}</span>
-                                      <span>{formatCurrency(Number(item.unitPrice || item.price || 0) * Number(item.quantity || 0))}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
                     </article>
                   )
                 })}
