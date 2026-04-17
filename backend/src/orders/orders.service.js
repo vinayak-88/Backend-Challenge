@@ -207,7 +207,7 @@ class OrdersService {
       });
     }
 
-    await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id: existingCart.id },
         data: {
@@ -227,11 +227,10 @@ class OrdersService {
           orderId: existingCart.id,
         })),
       });
-    });
-
-    return this.prisma.order.findUnique({
-      where: { id: existingCart.id },
-      select: cartSelect,
+      return tx.order.findUnique({
+        where: { id: existingCart.id },
+        select: cartSelect,
+      });
     });
   }
 
